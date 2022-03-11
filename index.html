@@ -1,0 +1,638 @@
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="crossorigin="anonymous"></script>
+    <!--script src='https://cdn.jsdelivr.net/gh/aframevr/aframe@1c2407b26c61958baa93967b5412487cd94b290b/dist/aframe-master.min.js'></script-->
+    <!--script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script-->
+    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@1c2407b26c61958baa93967b5412487cd94b290b/dist/aframe-master.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .arjs-loader {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .arjs-loader div {
+                text-align: center;
+                font-size: 1.25em;
+                color: white;
+            }
+    </style>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.0-alpha-rc1/aframe/build/aframe-ar-nft.js"></script>
+  
+    <!-- rawgithack development URL -->
+    <!--script src='https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js'></script-->
+    
+</head>
+
+    <script>
+        var statusScan = 0;//0 cargado Puntos,1 escaneandoImagen, 2 imagenEncontrada
+        var panelInfoActiva = false;
+        AFRAME.registerComponent('markerhandler', {
+            init: function () {
+                this.el.sceneEl.addEventListener('markerFound', () => {
+                    //buscar imagen cuando el panel este apagado
+                    if (!panelInfoActiva) {
+                        console.log('Imagen encontrada');
+                        //document.querySelector('#letreroEscaneo').style.display = "none"
+                        statusScan = 2;
+                        managerScan(statusScan);
+                    }
+                });
+                this.el.sceneEl.addEventListener('markerLost', () => {
+                    if (!panelInfoActiva) {
+                        console.log('escaneandoImagen');
+                        statusScan = 1;
+                        managerScan(statusScan);
+                        //document.querySelector('#letreroEscaneo').style.display = "block";
+                    }
+                });
+            }
+        })
+    </script>
+    <body style='margin : 0px; overflow: hidden;'>
+        <!-- minimal loader shown until image descriptors are loaded -->
+        <div class="arjs-loader">
+            <div>LOADING...</div>
+        </div>
+        <a-scene vr-mode-ui='enabled: false;'
+                 renderer="logarithmicDepthBuffer: true;"
+                 embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false;'>
+
+            <!-- use rawgithack to retrieve the correct url for nft marker (see 'pinball' below) -->
+            <a-nft markerhandler
+                   type='nft'
+                   url="./Fragmento1/Bimbo"
+                   smooth='true' smoothCount='10' smoothTolerance='0.01' smoothThreshold='5'>
+                <!-- <a-entity
+                    gltf-model='https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf'
+                    scale="5 5 5"
+                    position="0 0 0"
+                    >
+                </a-entity> -->
+            </a-nft>
+            <script>
+                
+                //hack para url dinámica -- solo se habilita cuando vaya a servidor
+               /*  function setUrl(active)
+                {
+                    if(active === true)
+                    {
+                        var urlCompleta = window.location.href + "/Fragmento1/Bimbo"
+                        document.querySelector("a-nft").setAttribute("url", urlCompleta)
+                        //url="https://www.virtuelle.mx/nft/Fragmento1/Bimbo"
+                    }
+                }
+                
+                setUrl(false)*/
+            </script> 
+            <a-entity camera></a-entity>
+        </a-scene>
+        <style>
+            .wrapper {
+
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            #letreroEscaneo, #wrapperAnalisis {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            @keyframes pingpong {
+                0% {
+                    left: 0%;
+                    background: red;
+                }
+
+                50% {
+                    left: 100%;
+                    background: blue;
+                }
+
+                100% {
+                    left: 0%;
+                    background: red;
+                }
+            }
+
+            @keyframes palpito {
+                0% {
+                    background-size: 10%;
+                }
+
+                50% {
+                    background-size: 14%;
+                }
+
+                100% {
+                    background-size: 10%;
+                }
+            }
+
+            #barraScan {
+                position: absolute;
+                height: 100%;
+                width: 1em;
+                background: red;
+                animation-name: pingpong;
+                animation-duration: 4s;
+                animation-iteration-count: infinite;
+            }
+
+            #iconAnalisis {
+                height: 100%;
+                width: 100%;
+                background: url(iconAnalisis.svg) no-repeat;
+                background-position: center;
+                background-size: 10%;
+                animation-name: palpito;
+                animation-duration: 3s;
+                animation-iteration-count: infinite;
+            }
+
+            #infoAnalisis {
+                display: none;
+                height: 50%;
+                width: 80%;
+                background-image: url('img/cerrar.png');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                position: absolute;
+                top: 25%;
+                left: 10%;
+            }
+
+            #cerrar {
+                height: 50px;
+                width: 50px;
+                background-image: url('img/cerrar.png');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                position: absolute;
+                top: 0;
+                left: calc(50% - 25px);
+            }
+            #target1 {
+                position: relative;
+                top: 50%;
+                transform: translateY(-60%);
+            }
+            #busqueda {
+                display: none;
+            }
+            #mira {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 15.33%;
+                height: 40.88%;
+                transform: scale(1)  translate(-50%, -50%);                
+                background-image: url('img/bolita.png');
+                background-repeat: no-repeat;
+                background-size: contain;
+            }
+            #contador{
+                position: fixed;
+                top: 0;
+                left: 0;
+                color: white;
+                font-size: 2em;
+                margin: 2%;
+            }
+
+            #cont_icons{
+                position: absolute;
+                top: 0;
+                width: 100vw;
+                left: 0;
+                overflow: hidden;
+            }
+            .icon{
+                float: left;
+                width: 12.5%;
+                box-sizing: border-box;
+                padding: 0.5em;
+            }
+
+            @media only screen and (orientation: landscape) {
+                #cont_icons{
+                    width: 12.5vh;
+                }
+                .icon{
+                   width: 12.5vh;
+                   clear: both;
+                }
+            }
+        </style>
+        <div id="wrapper" class="wrapper">
+            <div id="letreroEscaneo">
+                <div id="barraScan"></div>
+            </div>
+            <div id="wrapperAnalisis">
+                <div id="iconAnalisis">
+
+                </div>
+                <div id="infoAnalisis">
+                    <div id="cerrar"></div>
+                </div>
+            </div>
+        </div>
+        <div id="busqueda" class="wrapper">
+            <div id="target1">
+                <img src="img/target.png" alt="target" width="100%"/>
+                <div id="mira"></div>
+            </div>
+        </div>
+        <div id="contador" style="display:none;">
+            0/8
+        </div>
+        <div id="cont_icons">
+            <div class="icon" id="alineacion">
+                            <svg version="1.1" id="alineacion" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                 viewBox="0 0 191.4 191.6" style="enable-background:new 0 0 191.4 191.6;" xml:space="preserve">
+                <style type="text/css">
+                .icon_alineacion {
+                    fill: grey;
+                }
+
+                .st0 {
+                    fill: rgba(0,0,0,0)
+                }
+                </style>
+            <path class="icon_alineacion" d="M116.7,106.8c0.6-1.6,0.8-2.2,1.6-3.8l5.6-0.8c1.4-0.2,2.6-1.4,2.6-3v-6.4c0-1.4-1-2.8-2.6-3
+	            l-5.6-0.8c-0.6-1.6-0.8-2.2-1.6-3.8l3.4-4.4c0.8-1.2,0.8-2.8-0.2-4l-4.6-4.6c-1-1-2.8-1.2-4-0.2l-4.4,3.4c-1.6-0.6-2.2-0.8-3.8-1.6
+	            l-0.8-5.6c-0.2-1.4-1.4-2.6-3-2.6h-6.4c-1.4,0-2.8,1-3,2.6l-0.8,5.6c-1.6,0.6-2.2,0.8-3.8,1.6L80.5,72c-1.2-0.8-2.8-0.8-4,0.2
+	            l-4.6,4.6c-1,1-1.2,2.8-0.2,4l3.4,4.4c-0.6,1.6-0.8,2.2-1.6,3.8l-5.6,0.8c-1.4,0.2-2.6,1.4-2.6,3v6.4c0,1.4,1,2.8,2.6,3l5.6,0.8
+	            c0.6,1.6,0.8,2.2,1.6,3.8l-3.2,4.6c-0.8,1.2-0.8,2.8,0.2,4l4.6,4.6c1,1,2.8,1.2,4,0.2l4.4-3.4c1.6,0.6,2.2,0.8,3.8,1.6l0.8,5.6
+	            c0.2,1.4,1.4,2.6,3,2.6h6.4c1.4,0,2.8-1,3-2.6l0.8-5.6c1.6-0.6,2.2-0.8,3.8-1.6l4.4,3.4c1.2,0.8,2.8,0.8,4-0.2l4.6-4.6
+	            c1-1,1.2-2.8,0.2-4L116.7,106.8z M95.7,107.8c-6.4,0-11.9-5.2-11.9-11.9S89.1,84,95.7,84s11.9,5.2,11.9,11.9
+	            C107.6,102.6,102.2,107.8,95.7,107.8z M93.7,56c1,1.4,3.2,1.4,4.2,0l7.9-9.9c0.6-0.8,0.8-2,0.4-2.8c-0.4-1-1.4-1.6-2.4-1.6h-4.6
+	            V28.8c0-1.8-1.4-3.2-3.2-3.2s-3.2,1.4-3.2,3.2v12.9h-4.6c-1,0-2,0.6-2.4,1.6s-0.4,2,0.4,2.8L93.7,56z M95.7,0c5.1,0,9.3,4.2,9.3,9.3
+	            s-4.2,9.3-9.3,9.3s-9.3-4.2-9.3-9.3S90.6,0,95.7,0z M55.2,59.6L52,62.9c-0.8,0.8-1,1.8-0.6,2.8s1.2,1.6,2.2,1.8l12.5,1.6
+	            c1.6,0.2,3.2-1.4,3-3l-1.6-12.5c-0.2-1-0.8-2-1.8-2.2c-1-0.4-2,0-2.8,0.6l-3.2,3.2l-9.3-9.3c-1.2-1.2-3.2-1.2-4.4,0s-1.2,3.2,0,4.4
+	            L55.2,59.6z M34.4,25.4c5.1,0,9.3,4.2,9.3,9.3S39.5,44,34.4,44s-9.3-4.2-9.3-9.3S29.3,25.4,34.4,25.4z M55.8,97.9
+	            c1.4-1,1.4-3.2,0-4.2l-9.9-7.9c-0.8-0.6-2-0.8-2.8-0.4c-1,0.4-1.6,1.4-1.6,2.4v4.6H28.6c-1.8,0-3.2,1.4-3.2,3.2s1.4,3.2,3.2,3.2
+	            h12.9v4.6c0,1,0.6,2,1.6,2.4s2,0.4,2.8-0.4L55.8,97.9z M9.3,86.6c5.1,0,9.3,4.2,9.3,9.3s-4.2,9.3-9.3,9.3S0,101,0,95.9
+	            S4.2,86.6,9.3,86.6z M65.9,122.5l-12.5,1.6c-1,0.2-2,0.8-2.2,1.8c-0.4,1,0,2,0.6,2.8L55,132l-9.3,9.3c-1.2,1.2-1.2,3.2,0,4.4
+	            s3.2,1.2,4.4,0l9.3-9.3l3.2,3.2c0.8,0.8,1.8,1,2.8,0.6s1.6-1.2,1.8-2.2l1.6-12.5C69.1,123.9,67.5,122.3,65.9,122.5z M27.9,150.6
+	            c3.6-3.6,9.4-3.5,13,0.1c3.6,3.6,3.7,9.5,0.1,13s-9.4,3.5-13-0.1S24.4,154.2,27.9,150.6z M97.7,135.8c-1-1.4-3.2-1.4-4.2,0l-7.9,9.9
+	            c-0.6,0.8-0.8,2-0.4,2.8c0.4,1,1.4,1.6,2.4,1.6h4.6V163c0,1.8,1.4,3.2,3.2,3.2s3.2-1.4,3.2-3.2v-12.9h4.6c1,0,2-0.6,2.4-1.6
+	            s0.4-2-0.4-2.8L97.7,135.8z M95.7,173c5.1,0,9.3,4.2,9.3,9.3s-4.2,9.3-9.3,9.3s-9.3-4.2-9.3-9.3S90.6,173,95.7,173z M136.2,132.2
+	            l3.2-3.2c0.8-0.8,1-1.8,0.6-2.8s-1.2-1.6-2.2-1.8l-12.5-1.6c-1.6-0.2-3.2,1.4-3,3l1.6,12.5c0.2,1,0.8,2,1.8,2.2c1,0.4,2,0,2.8-0.6
+	            l3.2-3.2l9.3,9.3c1.2,1.2,3.2,1.2,4.4,0s1.2-3.2,0-4.4L136.2,132.2z M157,148c5,0,9.1,4.1,9.1,9.1s-4.1,9.1-9.1,9.1
+	            s-9.1-4.1-9.1-9.1S152,148,157,148z M163,92.9h-12.9v-4.6c0-1-0.6-2-1.6-2.4s-2-0.4-2.8,0.4L135.6,94c-1.4,1-1.4,3.2,0,4.2l9.9,7.9
+	            c0.8,0.6,2,0.8,2.8,0.4s1.6-1.4,1.6-2.4v-4.6h12.9c1.8,0,3.2-1.4,3.2-3.2C166,94.3,164.6,92.9,163,92.9z M182.1,86.6
+	            c5.1,0,9.3,4.2,9.3,9.3s-4.2,9.3-9.3,9.3s-9.3-4.2-9.3-9.3S177,86.6,182.1,86.6z M125.5,69.3l12.5-1.6c1-0.2,2-0.8,2.2-1.8
+	            c0.4-1,0-2-0.6-2.8l-3.2-3.2l9.3-9.3c1.2-1.2,1.2-3.2,0-4.4s-3.2-1.2-4.4,0l-9.3,9.3l-3.2-3.2c-0.8-0.8-1.8-1-2.8-0.6
+	            s-1.6,1.2-1.8,2.2l-1.6,12.5C122.3,67.9,123.9,69.5,125.5,69.3z M156.9,25.5c5,0,9.1,4.1,9.1,9.1s-4.1,9.1-9.1,9.1s-9.1-4.1-9.1-9.1
+	            S151.9,25.5,156.9,25.5z" />
+
+            <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                </svg>
+            </div>
+            <div class="icon" id="asistencia">
+                <svg version="1.1" id="asistencia" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                     viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                    <style type="text/css">
+                        .icon_asistencia {
+                            fill: grey;
+                        }
+
+                        .st0 {
+                            fill: rgba(0,0,0,0)
+                        }
+                    </style>
+                    <path class="icon_asistencia" d="M110.8,1.6c8.5,0,15.6,6.4,16.4,14.8l4.6,41.7H59.7l4.6-41.7c0.9-8.4,8-14.8,16.5-14.8H110.8z
+	                     M147.6,25.1c14.3,0,25.9,11.6,25.9,25.9v113.1c0,14.3-11.6,25.9-25.9,25.9H44c-14.3,0-25.9-11.6-25.9-25.9V51
+	                    c0-14.3,11.6-25.9,25.9-25.9h14.8l-2.4,23.6h-7.7c-3.9,0-7.1,3.2-7.1,7.1s3.2,7.1,7.1,7.1l0,0h94.2c3.9,0,7.1-3.2,7.1-7.1
+	                    s-3.2-7.1-7.1-7.1h-7.7l-2.4-23.6H147.6L147.6,25.1z M136.8,93c2.3-3.1,1.7-7.5-1.4-9.9c-3.1-2.3-7.5-1.7-9.9,1.4l-37.9,50.6
+	                    L65,116.3c-3-2.5-7.5-2.1-10,0.9s-2.1,7.5,0.9,10l0,0l24.5,20.4c2.5,2.1,5.7,3,8.9,2.7c3.2-0.4,6.1-2.1,8.1-4.6L136.8,93L136.8,93z" />
+
+                    <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                    </svg>
+            </div>
+            <div class ="icon" id="despachar">
+                <svg version="1.1" id="devoluciones" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+                     y="0px" viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                <style type="text/css">
+                    .icon_despachar {
+                        fill: grey;
+                    }
+
+                    .st0 {
+                        fill: rgba(0,0,0,0)
+                    }
+                </style>
+                <path class="icon_despachar" d="M125.1,78.4L70.9,60.6c-0.6-0.2-1,0.2-1,0.8v73.8c0,0.4,0.2,0.6,0.6,0.8l54.2,17.8
+                    c0.4,0.2,1-0.2,1-0.8V79.2C125.5,78.8,125.3,78.6,125.1,78.4z M178.4,53.6L130,37.8c-0.2,0-0.4,0-0.4,0L81.4,53.6
+                    c-0.8,0.2-0.8,1.2,0,1.4l48.3,15.8c0.2,0,0.4,0,0.4,0L178.3,55C178.9,55,178.9,54,178.4,53.6z M188.8,60.6l-54.2,17.8
+                    c-0.4,0.2-0.6,0.4-0.6,0.8V153c0,0.6,0.6,0.8,1,0.8l54.2-17.8c0.4-0.2,0.6-0.4,0.6-0.8V61.3C189.8,60.8,189.2,60.4,188.8,60.6z
+                     M46.3,60.4h-39c-3,0-5.5,2.4-5.5,5.5c0,3,2.4,5.5,5.5,5.5h39c3,0,5.5-2.4,5.5-5.5C51.7,62.9,49.3,60.4,46.3,60.4z M46.3,91h-39
+                    c-3,0-5.5,2.4-5.5,5.5c0,3,2.4,5.5,5.5,5.5h39c3,0,5.5-2.4,5.5-5.5C51.7,93.6,49.3,91,46.3,91z M46.3,121.9h-39
+                    c-3,0-5.5,2.4-5.5,5.5c0,3.2,2.4,5.5,5.5,5.5h39c3,0,5.5-2.4,5.5-5.5S49.3,121.9,46.3,121.9z" />
+
+                <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                </svg>
+            </div>
+            <div class="icon" id="devoluciones">
+                <svg version="1.1" id="devoluciones" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	                 y="0px" viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                <style type="text/css">
+	                .icon_devoluciones{fill:grey;}
+	                .st0{fill:rgba(0,0,0,0)}
+                </style>
+                <path class="icon_devoluciones" d="M180.3,39.9h-169L31.8,20c0.8-0.8,1.9-1.2,3-1.2h121.9c1.1,0,2.2,0.4,3,1.2L180.3,39.9z
+	                 M189.7,57.1v111.5c0,2.4-1.9,4.3-4.3,4.3H6.2c-2.4,0-4.3-1.9-4.3-4.3V57.1c0-2.4,1.9-4.3,4.3-4.3h179.3
+	                C187.8,52.8,189.7,54.7,189.7,57.1L189.7,57.1z M141.2,118.8c0-16.3-13.2-29.4-29.4-29.4H72.4l7.1-7.1c2.5-2.5,2.5-6.6,0-9.1
+	                s-6.6-2.5-9.1,0l0,0L52.3,91.3c-0.6,0.6-1.1,1.3-1.4,2.1c0,0,0,0,0,0.1c-0.3,0.8-0.4,1.6-0.4,2.4s0.2,1.6,0.4,2.3v0.1
+	                c0.3,0.8,0.8,1.5,1.4,2.1l18.1,18.1c1.2,1.2,2.9,1.9,4.6,1.9c3.6,0,6.5-2.9,6.4-6.5c0-1.7-0.7-3.3-1.9-4.6l-7.1-7.1h39.3
+	                c9.1,0,16.5,7.4,16.5,16.5s-7.4,16.5-16.5,16.5H56.9c-3.6,0-6.5,2.9-6.5,6.5s2.9,6.5,6.5,6.5h54.9
+	                C128,148.3,141.2,135.1,141.2,118.8z"/>
+                <rect id="canvas" class="st0" width="191.6" height="191.6"/>
+                </svg>
+            </div>
+            <div class="icon" id="mantenimiento">
+                <svg version="1.1" id="mantenimiento" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+                     y="0px" viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                <style type="text/css">
+                    .icon_mantenimiento {
+                        fill: grey;
+                    }
+
+                    .st0 {
+                        fill: rgba(0,0,0,0)
+                    }
+                </style>
+                <path class="icon_mantenimiento" d="M142.9,80.9c18.2,12.1,28,2.3,39.4-9.1c9.6-9.6,9.3-20.7,4.8-33c-0.7-1.6-2.7-2.1-3.9-0.9
+	                L163,58.1c-0.7,0.7-1.4,0.9-2.3,0.7c-4.3-1.1-8.7-3.6-12.1-7.1c-3.4-3.4-5.9-7.7-7.1-12.1c-0.2-0.9,0-1.6,0.7-2.3L162.4,17
+	                c1.1-1.1,0.7-3.2-0.9-3.9c-12.3-4.5-23.4-4.8-33,4.8c-11.4,11.4-20.9,20.9-8.9,39.2c0.7,0.9,0.5,2.3-0.2,3L95.9,82.9L72.3,60.2
+	                c-0.9-0.7-0.9-2.1-0.2-3c12.1-18,2.3-28-9.1-39.4C53.4,8.2,42.3,8.5,30,13c-1.6,0.7-2.1,2.7-0.9,3.9l20.3,20.3
+	                c0.7,0.7,0.9,1.4,0.7,2.3c-1.1,4.3-3.6,8.7-7.1,12.1c-3.4,3.4-7.7,5.9-12.1,7.1c-0.9,0.2-1.6,0-2.3-0.7L8.4,37.6
+	                c-1.1-1.1-3.2-0.7-3.9,0.9C0,50.8-0.3,62,9.3,71.6C20.7,83,30.2,92.5,48.5,80.5c0.9-0.7,2.3-0.5,3,0.2L73.9,104l-54.6,52.5
+	                c-0.7,0.7-0.9,1.6-0.7,2.3c1.4,4.8,5.2,10.5,8.7,14.1c3.4,3.4,9.3,7.3,14.1,8.7c0.9,0.2,1.8,0,2.3-0.7l52.2-54l51.9,53.8
+	                c0.7,0.7,1.6,0.9,2.3,0.7c4.8-1.4,10.5-5.2,14.1-8.7c3.4-3.4,7.3-9.3,8.7-14.1c0.2-0.9,0-1.8-0.7-2.3L117.9,104L140,81.1
+	                C140.6,80.2,142,80.2,142.9,80.9z M42.8,162.8c-0.7,6.4-9.1,6.4-9.8,0c0-0.2,0-0.5,0-0.5c0.7-6.4,9.1-6.4,9.8,0
+	                C42.8,162.4,42.8,162.6,42.8,162.8z M153.6,157.6c0,0,0.2,0,0.5,0c6.4,0.7,6.4,9.1,0,9.8c-0.2,0-0.5,0-0.5,0
+	                C147.2,166.7,147.2,158.3,153.6,157.6z" />
+
+                <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                </svg>
+            </div>
+            <div class="icon" id="participar">
+                <svg version="1.1" id="participar" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                     viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                <style type="text/css">
+                    .icon_participar {
+                        fill: grey;
+                    }
+
+                    .st0 {
+                        fill: rgba(0,0,0,0)
+                    }
+                </style>
+                <path class="icon_participar" d="M46.4,164c-12.2,0-22.9,0-35.3,0c-1.6,0-2.9,1.3-2.9,2.9v18.6h41.1v-18.6
+	                C49.3,165.3,48,164,46.4,164z M16.1,179.6c-2.7,0-4.9-2.2-4.9-4.9s2.2-4.9,4.9-4.9s4.9,2.2,4.9,4.9C21,177.4,18.8,179.6,16.1,179.6z
+	                 M50.3,90.8c-2.2,0-3.9,1.7-4,3.9v23c0,0.8-0.7,1.5-1.5,1.5c-0.6,0-1.1-0.3-1.4-0.8c-0.1-0.2-0.2-0.4-0.2-0.7c0-1.5,0,7.7,0-29.5
+	                c0-2.2-1.8-4-4-4s-4,1.8-4,4v29.5c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5V79.3c0-2.2-1.8-4-4-4s-4,1.8-4,4v38.3
+	                c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5V88.2c0-2.2-1.8-4-4-4s-4,1.8-4,4v42.7c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5l0,0v-12.7
+	                v-5.4c0-2.2-1.8-4-4-4s-4,1.8-4,4v16c0,5,1.6,9.9,4.5,13.9c1,2,7.6,6.6,6.7,18.2h31.4c5.5-12,9.5-16.1,9.5-24.5V94.8
+	                C54.4,92.6,52.6,90.8,50.3,90.8z M16.1,172.9c-1,0-1.8,0.8-1.8,1.8c0,1.1,0.8,1.9,1.8,1.9s1.8-0.8,1.8-1.9
+	                C17.9,173.7,17.1,172.9,16.1,172.9z M151.1,141.7c-1,0-1.8,0.8-1.8,1.8s0.8,1.8,1.8,1.8s1.9-0.8,1.9-1.8S152.2,141.7,151.1,141.7z
+	                 M185.4,62c-2.2,0-4,1.8-4,4v22.9c0,0.4-0.2,0.8-0.4,1.1c-0.4,0.4-1.1,0.6-1.7,0.3s-0.9-0.8-0.9-1.4V59.4c0-2.2-1.8-4-4-4
+	                s-4,1.8-4,4v29.5c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5c0-17.6,0-27.5,0-38.3c0-2.2-1.8-4-4-4s-4,1.8-4,4v38.3
+	                c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5V59.4c0-2.2-1.8-4-4-4s-4,1.8-4,4V84c0,0,0,0,0,0.1v18.1c0,0.8-0.7,1.5-1.5,1.5l0,0l0,0
+	                c-0.8,0-1.5-0.7-1.5-1.5V84c0-2.2-1.8-4-4-4s-4,1.8-4,4v16c0,4.9,1.6,9.9,4.5,13.9c1,2.1,7.6,6.7,6.7,18.2H180
+	                c5.5-12.1,9.6-16.1,9.6-24.5V66C189.4,63.8,187.6,62,185.4,62z M181.5,135.2h-0.7h-34h-0.6c-1.6,0-2.9,1.3-2.9,2.9v47.4h41.2v-47.4
+	                C184.4,136.5,183,135.2,181.5,135.2z M151.1,148.4c-2.7,0-4.9-2.2-4.9-4.9s2.2-4.9,4.9-4.9s4.9,2.2,4.9,4.9S153.8,148.4,151.1,148.4
+	                z M83.8,103.7c-1.1,0-1.9,0.8-1.9,1.8s0.8,1.8,1.9,1.8c1,0,1.8-0.8,1.8-1.8C85.6,104.5,84.8,103.7,83.8,103.7z M114.1,94.8h-0.6
+	                H79.4h-0.6c-1.6,0-2.9,1.3-2.9,2.9v87.7H117V97.7C117,96.1,115.7,94.8,114.1,94.8z M83.8,110.4c-2.7,0-4.9-2.2-4.9-4.9
+	                c0-2.7,2.2-4.9,4.9-4.9c2.7,0,4.9,2.2,4.9,4.9C88.6,108.2,86.5,110.4,83.8,110.4z M118,21.6c-2.2,0-3.9,1.7-4,3.9v23
+	                c0,0.2,0,0.3-0.1,0.5c-0.2,0.7-0.9,1.1-1.7,1c-0.7-0.1-1.3-0.7-1.3-1.5c0-0.4,0-30.2,0-29.5c0-2.2-1.8-4-4-4s-4,1.8-4,4v29.5
+	                c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5c0-17.6,0-27.5,0-38.3c0-2.2-1.8-4-4-4s-4,1.8-4,4v38.3c0,0.8-0.7,1.5-1.5,1.5
+	                s-1.5-0.7-1.5-1.5V19c0-2.2-1.8-4-4-4s-4,1.8-4,4v42.7l0,0l0,0c0,0.8-0.7,1.5-1.5,1.5s-1.5-0.7-1.5-1.5v-18c0-2.2-1.8-4-4-4
+	                s-4,1.8-4,4v16c0,5,1.6,9.8,4.5,13.9c0.9,2,7.6,6.6,6.7,18.2h31.4c5.3-11.6,9.5-16,9.5-24.5V25.7C122.1,23.4,120.2,21.6,118,21.6z" />
+
+                <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                </svg>
+            </div>
+            <div class="icon" id="reloj">
+                <svg version="1.1" id="reloj" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                     viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                <style type="text/css">
+                    .icon_reloj {
+                        fill: grey;
+                    }
+
+                    .st0 {
+                        fill: rgba(0,0,0,0)
+                    }
+                </style>
+                <path class="icon_reloj" d="M95.8,0C42.9,0,0,42.9,0,95.8s42.9,95.8,95.8,95.8s95.8-42.9,95.8-95.8C191.5,42.9,148.7,0.1,95.8,0z
+	                 M95.8,174.2c-43.3,0-78.4-35.1-78.4-78.4s35.1-78.4,78.4-78.4s78.4,35.1,78.4,78.4C174.1,139.1,139.1,174.1,95.8,174.2z
+	                 M104.5,92.2V43.5c0-4.8-3.9-8.7-8.7-8.7c-4.8,0-8.7,3.9-8.7,8.7v52.3c0,2.3,0.9,4.5,2.5,6.2l26.1,26.1c3.5,3.3,9,3.2,12.3-0.2
+	                c3.3-3.4,3.3-8.7,0-12.1L104.5,92.2z" />
+
+                <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                </svg>
+            </div>
+            <div class="icon" id="vehiculo">
+                <svg version="1.1" id="vehiculo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                     viewBox="0 0 191.6 191.6" style="enable-background:new 0 0 191.6 191.6;" xml:space="preserve">
+                <style type="text/css">
+                    .icon_vehiculo {
+                        fill: grey;
+                    }
+
+                    .st0 {
+                        fill: rgba(0,0,0,0)
+                    }
+                </style>
+                <rect id="canvas" class="st0" width="191.6" height="191.6" />
+
+                <path class="icon_vehiculo" d="M174.2,100l-10.3-3.6l-14-18.4c-4-5.3-10.3-8.3-17-8.3H77.7c-5.7,0-11.1,2.2-15,6.3L37,101.8
+	                l-14,0.8c-11.1,0.8-19.8,9.9-19.8,21.2v12.9c0,7.3,5.9,13.2,13.2,13.2h9.5c2.8,8.7,10.9,15,20.4,15c9.7,0,17.8-6.3,20.4-15.2h60.1
+	                c2.6,8.7,10.9,15.2,20.6,15.2c9.7,0,17.8-6.3,20.4-15.2h7.3c7.3,0,13.2-5.9,13.2-13.2v-16.8C188.1,111.1,182.7,103,174.2,100z
+	                 M46.1,154.8c-6.3,0-11.3-5.1-11.3-11.3c0-6.3,5.1-11.3,11.3-11.3s11.3,5.1,11.3,11.3C57.7,149.7,52.6,154.8,46.1,154.8z
+	                 M147.3,154.8c-6.3,0-11.3-5.1-11.3-11.3c0-6.3,5.1-11.3,11.3-11.3s11.3,5.1,11.3,11.3S153.5,154.8,147.3,154.8z M175,139.8h-6.5
+	                c-1.8-10.1-10.5-17.8-21.2-17.8c-10.5,0-19.4,7.7-21.2,17.8H67.4C65.6,129.7,56.9,122,46.1,122s-19.4,7.7-21.2,17.8h-8.7
+	                c-1.6,0-3-1.4-3-3v-12.9c0-5.9,4.7-10.7,10.3-11.1l15.8-1c1.2,0,2.4-0.6,3.2-1.4l27.1-27.1c2-2,4.9-3.2,7.9-3.2h55.2
+	                c3.4,0,6.7,1.6,8.9,4.5l15,19.4c0.6,0.8,1.4,1.4,2.2,1.6l11.7,4.2C182.9,114.5,181.1,139.8,175,139.8z M144.7,45.2h16.1
+	                c-3.4,5.6-9.6,9.3-16.6,9.3c-8.4,0-15.6-5.3-18.3-12.8H78.4c-2.7,7.5-9.8,12.8-18.3,12.8c-7,0-13.2-3.7-16.6-9.3h16.1l5.8-10.1
+	                L59.6,25H43.5c3.4-5.6,9.6-9.4,16.6-9.4c8.4,0,15.6,5.3,18.3,12.8h47.6c2.7-7.5,9.8-12.8,18.3-12.8c7,0,13.2,3.7,16.6,9.4h-16.1
+	                l-5.8,10.1L144.7,45.2z" />
+
+                </svg>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var loader;
+            var intervalLoader;
+            var isLoaded = false;
+            var catalogoMisiones = [];
+            var misionActual = "";            
+            function GenerarCatalogoMisiones() {
+                //test
+                for (let i = 0; i < 8; i++) {
+                    let mision = { nombre: 'info_' + i, info: 'img/Misiones/info_' + (i + 1) + '.png' };
+                    catalogoMisiones.push(mision);
+                }
+                catalogoMisiones[0].left =  "10%";
+                catalogoMisiones[0].top =   "60%";
+                catalogoMisiones[1].left =  "53%";
+                catalogoMisiones[1].top = "71%";
+                catalogoMisiones[2].left = "61%";
+                catalogoMisiones[2].top = "78%";
+                catalogoMisiones[3].left = "13%";
+                catalogoMisiones[3].top = "75%";
+                catalogoMisiones[4].left = "24%";
+                catalogoMisiones[4].top = "76%";
+                catalogoMisiones[5].left = "61%";
+                catalogoMisiones[5].top = "78%";
+                catalogoMisiones[6].left = "42%";
+                catalogoMisiones[6].top = "76%";
+                catalogoMisiones[7].left = "23%";
+                catalogoMisiones[7].top = "81%";
+                //iconos
+                catalogoMisiones[0].icon = $(".icon_reloj")
+                catalogoMisiones[1].icon = $(".icon_devoluciones")
+                catalogoMisiones[2].icon = $(".icon_vehiculo")
+                catalogoMisiones[3].icon = $(".icon_asistencia")
+                catalogoMisiones[4].icon = $(".icon_alineacion")
+                catalogoMisiones[5].icon = $(".icon_mantenimiento")
+                catalogoMisiones[6].icon = $(".icon_participar")
+                catalogoMisiones[7].icon = $(".icon_despachar")
+            }
+            function GetMision() {
+                let numMision = randomInt(0, catalogoMisiones.length);
+                let mision = catalogoMisiones[numMision];
+                catalogoMisiones.splice(numMision, 1);
+                return mision;
+            }
+            function AnimacionImagenBuscar()
+            {
+                //TweenLite.to(mira,{top:"10%",left:"0%",duration:5}) //documentacion oncomplite
+                let mira = document.querySelector("#mira");
+                var animacion = gsap.timeline();
+                animacion.to(mira, { top: (randomInt(10, 90) + "%"), left: (randomInt(10, 90) + "%"), duration: randomFloat(0.5, 3) })
+                    .to(mira, { top: (randomInt(10, 90) + "%"), left: (randomInt(10, 90) + "%"), duration: randomFloat(0.5, 2) })
+                    .to(mira, { top: (randomInt(10, 90) + "%"), left: (randomInt(10, 90) + "%"), duration: randomFloat(0.5, 1) })
+                    .to(mira, { top: misionActual.top, left: misionActual.left, duration: randomFloat(0.2, 2) })
+                    .to(mira, {
+                        top: misionActual.top, left: misionActual.left, duration: 1,
+                        onComplete: () => {
+                            document.querySelector("#busqueda").style.display = "none";
+                            showInfo();
+                        }
+                    })
+
+            }
+            //start
+            window.onload = function () {
+                
+                
+                intervalLoader = setInterval(function () {
+                    loader = document.querySelector('.arjs-loader');
+                    //loader.style.display = 'none'
+                    console.log(loader);
+                    if (loader !== null) {
+                        isLoaded = true;
+                        GenerarCatalogoMisiones();
+                        console.log('ya cargo');
+                        ImprimirNumeroMisiones();
+                        document.querySelector('#letreroEscaneo').style.display = "block"
+                        clearInterval(intervalLoader);
+                        console.log(catalogoMisiones);
+                        console.log(isLoaded);
+                        loader.style.display = 'none'
+                    }
+                }, 500);
+            }
+            var timeOut;
+            function managerScan(status) {
+                //1 escaneandoImagen, 2 imagenEncontrada
+                if (status === 2) {
+                    document.querySelector('#letreroEscaneo').style.display = "none";
+                    document.querySelector('#infoAnalisis').style.display = "none";
+                    document.querySelector('#wrapperAnalisis').style.display = "block";
+                    var tiempo = randomInt(2000, 4000);
+                    console.log("antes time out" + tiempo)
+                    timeOut = setTimeout(function () {
+                        misionActual = GetMision();
+                        document.querySelector("#busqueda").style.display = "block";
+                        AnimacionImagenBuscar();
+                        //showInfo(misionActual);
+                        panelInfoActiva = true;
+
+                    }, tiempo)
+                }
+                if (status === 1) {
+                    document.querySelector('#letreroEscaneo').style.display = "block";
+                    document.querySelector('#wrapperAnalisis').style.display = "none"
+                    document.querySelector('#infoAnalisis').style.display = "none"
+                    if (timeOut != null) {
+                        clearTimeout(timeOut);
+                    }
+
+                }
+            }
+            function showInfo() {
+                console.log('prender panel de analisis')
+                document.querySelector('#infoAnalisis').style.display = "block";
+                document.querySelector('#infoAnalisis').style.backgroundImage = 'url(' + misionActual.info + ')';
+                misionActual.icon.css("fill", "red");
+                console.log(catalogoMisiones);
+                ImprimirNumeroMisiones();
+            }
+            document.querySelector("#cerrar").addEventListener("click", () => {
+                panelInfoActiva = false;
+                managerScan(1);
+            });
+            function ImprimirNumeroMisiones()
+            {
+                // aqui pones el div
+                let txtMisiones = (8 - catalogoMisiones.length) + "/8";
+                console.log(txtMisiones);
+                document.querySelector("#contador").innerHTML = txtMisiones;
+            }
+            function randomInt(min, max) {
+                return min + Math.floor((max - min) * Math.random());
+            }
+            function randomFloat(min, max)
+            {
+                return  Math.random() * (+max - +min) + +min;
+            }
+
+            //muestra cambio de color ---- $(".icon_alineacion").css("fill","black")
+        </script>
+    </body>
+</html>
